@@ -116,17 +116,42 @@ function processApprovalEdit_(ss, sheet, row, oldStatus, actor) {
 }
 
 function processRejectedEdit_(ss, sheet, row, oldStatus, actor) {
-  const confirmed = confirm_("Reject registration?", "No tenant email will be sent. The action will be logged.");
+  const prompt = promptText_(
+    "Reject registration?",
+    "Optional: write a reason/message for the tenant. If left empty, the rejection is logged only and no tenant email is sent. Press Cancel to keep the previous status."
+  );
 
-  if (!confirmed) {
+  if (!prompt.confirmed) {
     sheet.getRange(row, FDH.columns.status).setValue(oldStatus || FDH.statuses.pending);
     return;
   }
 
-  const record = getRecordFromRow_(sheet, row);
-  setReviewNotes_(sheet, row, `Rejected by ${actor} at ${new Date().toISOString()}.`);
-  appendLog_(ss, "rejected", record, FDH.statuses.rejected, actor, "");
-  updateDashboard();
+  withDocumentLock_(() => {
+    const record = getRecordFromRow_(sheet, row);
+    const reason = prompt.text;
+    const notes = [`Rejected by ${actor} at ${new Date().toISOString()}.`];
+    let details = "";
+
+    sheet.getRange(row, FDH.columns.approvedBy).clearContent();
+    sheet.getRange(row, FDH.columns.approvedAt).clearContent();
+    sheet.getRange(row, FDH.columns.inviteLink).clearContent();
+
+    if (reason && looksLikeEmail_(record.email)) {
+      notifyTenantRejected_(record, reason);
+      notes.push(`Tenant rejection message sent: ${reason}`);
+      details = `Tenant notified. Reason: ${reason}`;
+    } else if (reason) {
+      notes.push(`Tenant rejection message not sent because email is missing or invalid: ${reason}`);
+      details = `Tenant not notified because email is missing or invalid. Reason: ${reason}`;
+    } else {
+      notes.push("No tenant rejection message entered. Tenant was not emailed.");
+      details = "No tenant message entered.";
+    }
+
+    setReviewNotes_(sheet, row, notes.join("\n"));
+    appendLog_(ss, "rejected", record, FDH.statuses.rejected, actor, details);
+    updateDashboard();
+  });
 }
 
 function processMovedOutEdit_(ss, sheet, row, oldStatus, actor) {

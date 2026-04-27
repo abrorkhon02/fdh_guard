@@ -204,6 +204,20 @@ function confirm_(title, message) {
   return response === ui.Button.YES;
 }
 
+function promptText_(title, message) {
+  const ui = getUi_();
+  if (!ui) {
+    Logger.log(`Prompt unavailable: ${title}: ${message}`);
+    return { confirmed: false, text: "" };
+  }
+
+  const response = ui.prompt(title, message, ui.ButtonSet.OK_CANCEL);
+  return {
+    confirmed: response.getSelectedButton() === ui.Button.OK,
+    text: String(response.getResponseText() || "").trim()
+  };
+}
+
 function getUi_() {
   try {
     return SpreadsheetApp.getUi();

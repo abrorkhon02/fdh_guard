@@ -50,6 +50,25 @@ function notifyTenantApproved_(record, inviteLink) {
   });
 }
 
+function notifyTenantRejected_(record, reason) {
+  MailApp.sendEmail({
+    to: record.email,
+    subject: "FDH WhatsApp registration not approved",
+    body: [
+      `Hello ${record.name || "there"},`,
+      "",
+      "Your FDH WhatsApp group registration was reviewed and could not be approved.",
+      "",
+      "Message from the verification team:",
+      reason,
+      "",
+      "If you think this is a mistake, please submit the form again with corrected information or contact the FDH Student Representatives.",
+      "",
+      "FDH Student Representatives"
+    ].join("\n")
+  });
+}
+
 function notifyWAAdmins_(ss, record, movedOutResidents) {
   const emails = getEmailList_(ss, FDH.sheets.waAdmins);
   if (emails.length === 0) {

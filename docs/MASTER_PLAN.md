@@ -84,9 +84,10 @@ Allowed statuses:
 ### Manual rejection
 
 1. A verifier changes `Status` to `rejected`.
-2. The action is confirmed.
-3. Review notes, audit log, and dashboard are updated.
-4. No tenant email is sent by default until the group decides on rejection wording.
+2. The verifier is prompted for an optional rejection reason/message.
+3. If the verifier enters a message, the tenant receives a rejection email with that message.
+4. If the verifier leaves the message empty, the rejection is logged only and no tenant email is sent.
+5. Review notes, audit log, and dashboard are updated.
 
 ### Manual move-out
 
@@ -103,7 +104,8 @@ Allowed statuses:
 | New form submission | Review request email, including missing fields and room conflicts | No email | No email |
 | Approval without room conflict | No email | Approved email with invite link | Accept new resident |
 | Approval replacing approved resident(s) in same room | No email | Approved email with invite link | Accept new resident and remove previous resident(s) |
-| Rejection | No email by default | No email by default | No email |
+| Rejection with message | No email | Rejection email with verifier message | No email |
+| Rejection without message | No email | No email | No email |
 | Manual moved out | No email | No email | Remove moved-out resident |
 | Script failure | TechnicalAdmins, fallback DataVerifiers | No email | No email |
 
