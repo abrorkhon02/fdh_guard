@@ -95,19 +95,20 @@ function processApprovalEdit_(ss, sheet, row, oldStatus, actor) {
     }
 
     const now = new Date();
-    const movedOut = moveOutPreviousResidents_(sheet, record.normalizedRoom, row, now, actor);
+    const movedOutResidents = moveOutPreviousResidents_(sheet, record.normalizedRoom, row, now, actor);
+    const movedOutRows = movedOutResidents.map((resident) => resident.row);
 
     sheet.getRange(row, FDH.columns.approvedBy).setValue(actor);
     sheet.getRange(row, FDH.columns.approvedAt).setValue(now);
     sheet.getRange(row, FDH.columns.inviteLink).setValue(inviteLink);
-    setReviewNotes_(sheet, row, movedOut.length ? `Approved. Previous resident row(s) moved out: ${movedOut.join(", ")}` : "Approved.");
+    setReviewNotes_(sheet, row, movedOutRows.length ? `Approved. Previous resident row(s) moved out: ${movedOutRows.join(", ")}` : "Approved.");
 
     const approvedRecord = getRecordFromRow_(sheet, row);
     approvedRecord.inviteLink = inviteLink;
 
     notifyTenantApproved_(approvedRecord, inviteLink);
-    notifyWAAdmins_(ss, approvedRecord);
-    appendLog_(ss, "approved", approvedRecord, FDH.statuses.approved, actor, movedOut.length ? `Moved out rows: ${movedOut.join(", ")}` : "");
+    notifyWAAdmins_(ss, approvedRecord, movedOutResidents);
+    appendLog_(ss, "approved", approvedRecord, FDH.statuses.approved, actor, movedOutRows.length ? `Moved out rows: ${movedOutRows.join(", ")}` : "");
     updateDashboard();
 
     showAlert_("Resident approved", "Tenant and WhatsApp admins were notified.");
@@ -142,7 +143,9 @@ function processMovedOutEdit_(ss, sheet, row, oldStatus, actor) {
     sheet.getRange(row, FDH.columns.leftAt).setValue(new Date());
   }
 
-  appendLog_(ss, "moved_out_manual", record, FDH.statuses.movedOut, actor, "");
+  const movedOutRecord = getRecordFromRow_(sheet, row);
+  notifyWAAdminsMovedOut_(ss, movedOutRecord);
+  appendLog_(ss, "moved_out_manual", movedOutRecord, FDH.statuses.movedOut, actor, "WA admins notified to remove resident.");
   updateDashboard();
 }
 
@@ -150,13 +153,12 @@ function moveOutPreviousResidents_(sheet, normalizedRoom, approvedRow, movedOutA
   const previousResidents = findApprovedResidentsInRoom_(sheet, normalizedRoom, approvedRow);
   const ss = sheet.getParent();
 
-  previousResidents.forEach((resident) => {
+  return previousResidents.map((resident) => {
     sheet.getRange(resident.row, FDH.columns.status).setValue(FDH.statuses.movedOut);
     sheet.getRange(resident.row, FDH.columns.leftAt).setValue(movedOutAt);
 
     const movedRecord = getRecordFromRow_(sheet, resident.row);
     appendLog_(ss, "moved_out_auto", movedRecord, FDH.statuses.movedOut, actor, `New approved row: ${approvedRow}`);
+    return movedRecord;
   });
-
-  return previousResidents.map((resident) => resident.row);
 }

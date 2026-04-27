@@ -93,7 +93,19 @@ Allowed statuses:
 1. A verifier changes `Status` to `moved out`.
 2. The action is confirmed.
 3. `LeftAt` is filled if empty.
-4. Audit log and dashboard are updated.
+4. WhatsApp admins receive an email telling them to remove the resident if still present.
+5. Audit log and dashboard are updated.
+
+## Notification Matrix
+
+| Situation | DataVerifiers | Tenant | WAAdmins |
+|---|---|---|---|
+| New form submission | Review request email, including missing fields and room conflicts | No email | No email |
+| Approval without room conflict | No email | Approved email with invite link | Accept new resident |
+| Approval replacing approved resident(s) in same room | No email | Approved email with invite link | Accept new resident and remove previous resident(s) |
+| Rejection | No email by default | No email by default | No email |
+| Manual moved out | No email | No email | Remove moved-out resident |
+| Script failure | TechnicalAdmins, fallback DataVerifiers | No email | No email |
 
 ## Hardening Checklist
 

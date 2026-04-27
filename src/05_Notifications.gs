@@ -11,8 +11,9 @@ function notifyDataVerifiers_(ss, record, missing, collisions) {
   }
 
   const body = [
-    "New FDH WhatsApp registration.",
+    "New FDH WhatsApp registration is waiting for review.",
     "",
+    `Sheet row: ${record.row}`,
     `Name: ${record.name}`,
     `Room: ${record.room}`,
     `Phone: ${record.phone}`,
@@ -26,7 +27,7 @@ function notifyDataVerifiers_(ss, record, missing, collisions) {
 
   MailApp.sendEmail({
     to: emails.join(","),
-    subject: "New FDH Registration - Please Review",
+    subject: `FDH registration pending review - ${record.room || "unknown room"}`,
     body
   });
 }
@@ -49,7 +50,29 @@ function notifyTenantApproved_(record, inviteLink) {
   });
 }
 
-function notifyWAAdmins_(ss, record) {
+function notifyWAAdmins_(ss, record, movedOutResidents) {
+  const emails = getEmailList_(ss, FDH.sheets.waAdmins);
+  if (emails.length === 0) {
+    throw new Error("No WhatsApp admin emails configured.");
+  }
+
+  const movedOut = movedOutResidents || [];
+  const isReplacement = movedOut.length > 0;
+  const subject = isReplacement
+    ? `FDH WhatsApp room change - ${record.room}`
+    : "Verified FDH resident waiting for WhatsApp approval";
+  const body = isReplacement
+    ? buildWAReplacementBody_(record, movedOut)
+    : buildWAApprovalBody_(record);
+
+  MailApp.sendEmail({
+    to: emails.join(","),
+    subject,
+    body
+  });
+}
+
+function notifyWAAdminsMovedOut_(ss, record) {
   const emails = getEmailList_(ss, FDH.sheets.waAdmins);
   if (emails.length === 0) {
     throw new Error("No WhatsApp admin emails configured.");
@@ -57,18 +80,51 @@ function notifyWAAdmins_(ss, record) {
 
   MailApp.sendEmail({
     to: emails.join(","),
-    subject: "Verified FDH resident waiting for WhatsApp approval",
+    subject: `FDH WhatsApp removal needed - ${record.room}`,
     body: [
-      "A resident has been verified and should be accepted into the WhatsApp group.",
+      "A resident was marked as moved out and should be removed from the WhatsApp group if still present.",
       "",
-      `Name: ${record.name}`,
-      `Room: ${record.room}`,
-      `Phone: ${record.phone}`,
-      `Email: ${record.email}`,
+      "Remove from WhatsApp group:",
+      formatResidentForEmail_(record),
       "",
-      "Please accept this person's WhatsApp join request if it appears."
+      "No new resident was approved by this action."
     ].join("\n")
   });
+}
+
+function buildWAApprovalBody_(record) {
+  return [
+    "A resident has been verified and should be accepted into the WhatsApp group.",
+    "",
+    "Accept into WhatsApp group:",
+    formatResidentForEmail_(record),
+    "",
+    "Please accept this person's WhatsApp join request if it appears."
+  ].join("\n");
+}
+
+function buildWAReplacementBody_(record, movedOutResidents) {
+  return [
+    "A new resident has been verified for a room that already had approved resident(s).",
+    "",
+    "Accept this new resident into the WhatsApp group:",
+    formatResidentForEmail_(record),
+    "",
+    "Remove these previous resident(s) from the WhatsApp group if still present:",
+    movedOutResidents.map(formatResidentForEmail_).join("\n\n"),
+    "",
+    "Reason: the new resident was approved for the same room, so the previous approved resident(s) were marked as moved out in the sheet."
+  ].join("\n");
+}
+
+function formatResidentForEmail_(record) {
+  return [
+    `Name: ${record.name || "-"}`,
+    `Room: ${record.room || "-"}`,
+    `Phone: ${record.phone || "-"}`,
+    `Email: ${record.email || "-"}`,
+    `Sheet row: ${record.row || "-"}`
+  ].join("\n");
 }
 
 function notifyTechnicalAdmins_(ss, subject, body) {
