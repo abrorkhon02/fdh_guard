@@ -1,0 +1,38 @@
+{
+  "name": "fdh_guard",
+  "version": "1.0.0",
+  "description": "Google Apps Script automation for FDH resident verification and WhatsApp onboarding.",
+  "scripts": {
+    "validate": "node scripts/validate-gas.js",
+    "check": "npm run validate && npm run clasp:version",
+    "clasp": "clasp",
+    "clasp:version": "clasp --version",
+    "clasp:login": "clasp login",
+    "clasp:status": "clasp show-authorized-user",
+    "clasp:pull": "clasp pull",
+    "clasp:push": "clasp push",
+    "clasp:deploy": "clasp deploy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abrorkhon02/fdh_guard.git"
+  },
+  "keywords": [
+    "google-apps-script",
+    "clasp",
+    "google-sheets",
+    "google-forms"
+  ],
+  "author": "",
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/abrorkhon02/fdh_guard/issues"
+  },
+  "homepage": "https://github.com/abrorkhon02/fdh_guard#readme",
+  "devDependencies": {
+    "@google/clasp": "3.3.0",
+    "@types/google-apps-script": "2.0.8"
+  },
+  "private": true
+}
