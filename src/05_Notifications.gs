@@ -32,6 +32,30 @@ function notifyDataVerifiers_(ss, record, missing, collisions) {
   });
 }
 
+function notifyTenantApplicationReceived_(record) {
+  if (!looksLikeEmail_(record.email)) {
+    return false;
+  }
+
+  MailApp.sendEmail({
+    to: record.email,
+    subject: "FDH WhatsApp registration received",
+    body: [
+      `Hello ${record.name || "there"},`,
+      "",
+      "We received your FDH WhatsApp group registration.",
+      "",
+      "Your application is now waiting for manual review by the FDH verification team. Please stand by; you will receive another email when your application is approved or if more information is needed.",
+      "",
+      `If there is no change within 14 days, please contact ${FDH.contactEmail}.`,
+      "",
+      "FDH Student Representatives"
+    ].join("\n")
+  });
+
+  return true;
+}
+
 function notifyTenantApproved_(record, inviteLink) {
   MailApp.sendEmail({
     to: record.email,

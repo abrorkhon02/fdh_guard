@@ -34,6 +34,7 @@ const FDH = {
   },
   statusOptions: ["pending", "approved", "rejected", "moved out"],
   lockTimeoutMs: 30000,
+  contactEmail: "abrorkhonazimov@gmail.com",
   configCells: {
     inviteLink: "B1"
   },

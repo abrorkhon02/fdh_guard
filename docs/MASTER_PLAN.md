@@ -68,7 +68,8 @@ Allowed statuses:
 6. Existing approved residents in the same room are detected and included in review notes.
 7. Existing residents are not moved out yet. Move-out happens only after the new resident is approved.
 8. DataVerifiers receive an email with the submission and any warnings.
-9. A log row is appended and the dashboard is updated.
+9. The applicant receives a confirmation email saying the application was received and to contact the configured contact address if there is no change within 14 days.
+10. A log row is appended and the dashboard is updated.
 
 ### Manual approval
 
@@ -101,7 +102,7 @@ Allowed statuses:
 
 | Situation | DataVerifiers | Tenant | WAAdmins |
 |---|---|---|---|
-| New form submission | Review request email, including missing fields and room conflicts | No email | No email |
+| New form submission | Review request email, including missing fields and room conflicts | Application received confirmation | No email |
 | Approval without room conflict | No email | Approved email with invite link | Accept new resident |
 | Approval replacing approved resident(s) in same room | No email | Approved email with invite link | Accept new resident and remove previous resident(s) |
 | Rejection with message | No email | Rejection email with verifier message | No email |

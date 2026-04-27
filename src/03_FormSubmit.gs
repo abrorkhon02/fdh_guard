@@ -29,7 +29,11 @@ function handleFormSubmit(e) {
       setReviewNotes_(sheet, row, notes.join("\n"));
 
       notifyDataVerifiers_(ss, record, missing, collisions);
-      appendLog_(ss, "form_submit", record, FDH.statuses.pending, "system", notes.join(" | "));
+      const applicantNotified = notifyTenantApplicationReceived_(record);
+      const details = notes.slice();
+      details.push(applicantNotified ? "Applicant confirmation email sent." : "Applicant confirmation email not sent because email is missing or invalid.");
+
+      appendLog_(ss, "form_submit", record, FDH.statuses.pending, "system", details.join(" | "));
       updateDashboard();
     });
   } catch (error) {
