@@ -184,10 +184,31 @@ function findApprovedResidentsInRoom_(sheet, normalizedRoom, excludedRow) {
 }
 
 function showAlert_(title, message) {
-  SpreadsheetApp.getUi().alert(title, message, SpreadsheetApp.getUi().ButtonSet.OK);
+  const ui = getUi_();
+  if (!ui) {
+    Logger.log(`${title}: ${message}`);
+    return;
+  }
+
+  ui.alert(title, message, ui.ButtonSet.OK);
 }
 
 function confirm_(title, message) {
-  const response = SpreadsheetApp.getUi().alert(title, message, SpreadsheetApp.getUi().ButtonSet.YES_NO);
-  return response === SpreadsheetApp.getUi().Button.YES;
+  const ui = getUi_();
+  if (!ui) {
+    Logger.log(`Confirmation unavailable: ${title}: ${message}`);
+    return false;
+  }
+
+  const response = ui.alert(title, message, ui.ButtonSet.YES_NO);
+  return response === ui.Button.YES;
+}
+
+function getUi_() {
+  try {
+    return SpreadsheetApp.getUi();
+  } catch (error) {
+    Logger.log(`Spreadsheet UI unavailable in this execution context: ${error}`);
+    return null;
+  }
 }

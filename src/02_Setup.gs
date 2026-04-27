@@ -1,5 +1,11 @@
 function onOpen() {
-  SpreadsheetApp.getUi()
+  const ui = getUi_();
+  if (!ui) {
+    Logger.log("FDH Guard menu skipped because spreadsheet UI is unavailable.");
+    return;
+  }
+
+  ui
     .createMenu(FDH.appName)
     .addItem("Run initial setup", "runInitialSetup")
     .addItem("Install triggers", "installTriggers")
@@ -23,7 +29,7 @@ function runInitialSetup() {
   repairValidationAndFormatting();
   updateDashboard();
 
-  SpreadsheetApp.getUi().alert("FDH Guard setup completed.");
+  showAlert_("FDH Guard", "Setup completed.");
 }
 
 function installTriggers() {
@@ -40,7 +46,7 @@ function installTriggers() {
   ScriptApp.newTrigger("handleStatusEdit").forSpreadsheet(ss).onEdit().create();
   ScriptApp.newTrigger("monthlyCleanup").timeBased().onMonthDay(1).atHour(0).create();
 
-  SpreadsheetApp.getUi().alert("FDH Guard triggers installed.");
+  showAlert_("FDH Guard", "Triggers installed.");
 }
 
 function ensureCoreSheets_(ss) {
